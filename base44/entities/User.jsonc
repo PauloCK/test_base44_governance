@@ -1,0 +1,19 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "description": "Papel do usuário no app: admin, rh, pd ou user.",
+      "enum": [
+        "admin",
+        "user",
+        "rh",
+        "pd"
+      ]
+    }
+  },
+  "required": [
+    "role"
+  ]
+}

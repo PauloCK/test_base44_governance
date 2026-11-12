@@ -1,0 +1,47 @@
+{
+  "name": "TesteRLS",
+  "properties": {
+    "leitor_email": {
+      "description": "\u00danico e-mail que pode ler o registro (teste de RLS).",
+      "type": "string"
+    },
+    "observacao": {
+      "description": "Observa\u00e7\u00e3o livre sobre o teste.",
+      "type": "string"
+    },
+    "titulo": {
+      "description": "T\u00edtulo curto do registro de teste.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "titulo"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.leitor_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    }
+  },
+  "type": "object"
+}

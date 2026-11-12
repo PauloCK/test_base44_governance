@@ -1,0 +1,11 @@
+# Quem precisa aprovar mudanças em cada parte do repo.
+# Padrão: tudo precisa do dono do projeto.
+*                    @PauloCK
+
+# Área de P&D: o construtor de P&D também pode aprovar.
+/src/pages/pd/       @PauloCK @paulockotc
+
+# Áreas sensíveis: só o dono (no lugar do líder de RH no teste).
+/src/pages/rh/       @PauloCK
+/base44/             @PauloCK
+/.github/            @PauloCK
