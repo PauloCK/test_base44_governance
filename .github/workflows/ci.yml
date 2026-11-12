@@ -15,4 +15,4 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          VITE_BASE44_APP_ID: ${{ vars.BASE44_APP_ID || '6af5d6dba84b59de6631e63d' }}
+          VITE_BASE44_APP_ID: ${{ vars.BASE44_APP_ID }}
