@@ -4,7 +4,7 @@
   "properties": {
     "titulo": {
       "type": "string",
-      "description": "Título do experimento de P&D."
+      "description": "Título do experimento de P&D (teste de PR em base44/)."
     },
     "resultado": {
       "type": "string",
