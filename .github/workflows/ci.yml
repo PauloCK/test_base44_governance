@@ -8,11 +8,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - run: npm ci
       - run: npm run build
         env:
-          VITE_BASE44_APP_ID: ${{ vars.BASE44_APP_ID }}
+          VITE_BASE44_APP_ID: ${{ vars.BASE44_APP_ID || '6af5d6dba84b59de6631e63d' }}
