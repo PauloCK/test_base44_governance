@@ -9,7 +9,10 @@
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:local": "node scripts/dados-exemplo/dev-local.mjs",
+    "dados-exemplo": "node scripts/dados-exemplo/dev-local.mjs --so-carregar",
+    "dados-exemplo:conferir": "node scripts/dados-exemplo/conferir.mjs"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.60",
