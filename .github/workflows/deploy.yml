@@ -19,6 +19,26 @@ jobs:
           node-version: 22
       - run: npm ci
       - run: npm install -g base44@0.3.3
+      # A main do app no Base44 fica protegida o tempo todo, e assim nem o owner muda a produção
+      # por fora do git. A proteção também barra o deploy do CLI, então ela é desligada só
+      # durante o deploy e religada no passo final, que roda mesmo se o deploy falhar.
+      - name: Desligar a proteção da main no Base44
+        env:
+          BASE44_APP_ID: ${{ vars.BASE44_APP_ID }}
+          BASE44_ACCESS_TOKEN: ${{ secrets.BASE44_ACCESS_TOKEN }}
+          BASE44_REFRESH_TOKEN: ${{ secrets.BASE44_REFRESH_TOKEN }}
+          BASE44_DISABLE_TELEMETRY: "1"
+        run: |
+          set -euo pipefail
+          base44 whoami > /dev/null 2>&1
+          TOKEN=$(node -e 'console.log(require(require("os").homedir()+"/.base44/auth/auth.json").accessToken)')
+          echo "::add-mask::$TOKEN"
+          status=$(curl -sS -o resposta.json -w '%{http_code}' -X PUT \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"protected": false}' \
+            "https://app.base44.com/api/apps/$BASE44_APP_ID/branches/main/protection")
+          if [ "$status" != "200" ]; then echo "::error::falha ao desligar a proteção (HTTP $status)"; exit 1; fi
+          echo "::notice::proteção da main desligada para o deploy"
       - name: Deploy (entidades, funções e site)
         env:
           BASE44_APP_ID: ${{ vars.BASE44_APP_ID }}
@@ -28,11 +48,25 @@ jobs:
           BASE44_DISABLE_TELEMETRY: "1"
         run: |
           set -o pipefail
-          # Diagnóstico sem expor segredos: só diz se cada valor existe e quando o token expira.
-          [ -n "$BASE44_APP_ID" ] && echo "::notice::BASE44_APP_ID presente" || echo "::error::BASE44_APP_ID vazio (variável do repo)"
-          [ -n "$BASE44_ACCESS_TOKEN" ] && echo "::notice::BASE44_ACCESS_TOKEN presente" || echo "::error::BASE44_ACCESS_TOKEN vazio (secret do environment)"
-          [ -n "$BASE44_REFRESH_TOKEN" ] && echo "::notice::BASE44_REFRESH_TOKEN presente" || echo "::error::BASE44_REFRESH_TOKEN vazio (secret do environment)"
-          node -e 'const t=process.env.BASE44_ACCESS_TOKEN||"";const p=t.split(".");try{const c=JSON.parse(Buffer.from(p[1],"base64url").toString());console.log("::notice::token JWT: tem sub="+(!!c.sub)+", exp="+new Date(c.exp*1000).toISOString())}catch(e){console.log("::error::BASE44_ACCESS_TOKEN não é um JWT")}'
-          base44 whoami 2>&1 | tail -n 5 | sed -E 's/[A-Za-z0-9_-]{30,}/[omitido]/g; s/^/::notice::whoami: /' || true
           base44 deploy -y --build > deploy.log 2>&1 || { tail -n 25 deploy.log | sed -E 's/[A-Za-z0-9_-]{30,}/[omitido]/g; s/%/%25/g; s/^/::error::deploy: /'; exit 1; }
           tail -n 15 deploy.log | sed -E 's/[A-Za-z0-9_-]{30,}/[omitido]/g; s/^/::notice::deploy: /'
+      - name: Religar a proteção da main no Base44
+        if: always()
+        env:
+          BASE44_APP_ID: ${{ vars.BASE44_APP_ID }}
+          BASE44_ACCESS_TOKEN: ${{ secrets.BASE44_ACCESS_TOKEN }}
+          BASE44_REFRESH_TOKEN: ${{ secrets.BASE44_REFRESH_TOKEN }}
+          BASE44_DISABLE_TELEMETRY: "1"
+        run: |
+          set -euo pipefail
+          base44 whoami > /dev/null 2>&1
+          TOKEN=$(node -e 'console.log(require(require("os").homedir()+"/.base44/auth/auth.json").accessToken)')
+          echo "::add-mask::$TOKEN"
+          status=$(curl -sS -o resposta.json -w '%{http_code}' -X PUT \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"protected": true}' \
+            "https://app.base44.com/api/apps/$BASE44_APP_ID/branches/main/protection")
+          if [ "$status" != "200" ] || ! grep -q '"protected": *true' resposta.json; then
+            echo "::error::falha ao religar a proteção (HTTP $status). Religue manualmente."; exit 1
+          fi
+          echo "::notice::proteção da main religada"
