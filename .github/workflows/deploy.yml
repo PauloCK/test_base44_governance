@@ -21,8 +21,8 @@ jobs:
       - run: npm install -g base44@0.3.3
       - name: Deploy (entidades, funções e site)
         env:
-          BASE44_APP_ID: ${{ vars.BASE44_APP_ID || '6af5d6dba84b59de6631e63d' }}
-          VITE_BASE44_APP_ID: ${{ vars.BASE44_APP_ID || '6af5d6dba84b59de6631e63d' }}
+          BASE44_APP_ID: ${{ vars.BASE44_APP_ID }}
+          VITE_BASE44_APP_ID: ${{ vars.BASE44_APP_ID }}
           BASE44_ACCESS_TOKEN: ${{ secrets.BASE44_ACCESS_TOKEN }}
           BASE44_REFRESH_TOKEN: ${{ secrets.BASE44_REFRESH_TOKEN }}
           BASE44_DISABLE_TELEMETRY: "1"
