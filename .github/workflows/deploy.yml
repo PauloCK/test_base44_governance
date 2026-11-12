@@ -25,4 +25,14 @@ jobs:
           VITE_BASE44_APP_ID: ${{ vars.BASE44_APP_ID }}
           BASE44_ACCESS_TOKEN: ${{ secrets.BASE44_ACCESS_TOKEN }}
           BASE44_REFRESH_TOKEN: ${{ secrets.BASE44_REFRESH_TOKEN }}
-        run: base44 deploy -y --build
+          BASE44_DISABLE_TELEMETRY: "1"
+        run: |
+          set -o pipefail
+          # Diagnóstico sem expor segredos: só diz se cada valor existe e quando o token expira.
+          [ -n "$BASE44_APP_ID" ] && echo "::notice::BASE44_APP_ID presente" || echo "::error::BASE44_APP_ID vazio (variável do repo)"
+          [ -n "$BASE44_ACCESS_TOKEN" ] && echo "::notice::BASE44_ACCESS_TOKEN presente" || echo "::error::BASE44_ACCESS_TOKEN vazio (secret do environment)"
+          [ -n "$BASE44_REFRESH_TOKEN" ] && echo "::notice::BASE44_REFRESH_TOKEN presente" || echo "::error::BASE44_REFRESH_TOKEN vazio (secret do environment)"
+          node -e 'const t=process.env.BASE44_ACCESS_TOKEN||"";const p=t.split(".");try{const c=JSON.parse(Buffer.from(p[1],"base64url").toString());console.log("::notice::token JWT: tem sub="+(!!c.sub)+", exp="+new Date(c.exp*1000).toISOString())}catch(e){console.log("::error::BASE44_ACCESS_TOKEN não é um JWT")}'
+          base44 whoami 2>&1 | tail -n 5 | sed -E 's/[A-Za-z0-9_-]{30,}/[omitido]/g; s/^/::notice::whoami: /' || true
+          base44 deploy -y --build > deploy.log 2>&1 || { tail -n 25 deploy.log | sed -E 's/[A-Za-z0-9_-]{30,}/[omitido]/g; s/%/%25/g; s/^/::error::deploy: /'; exit 1; }
+          tail -n 15 deploy.log | sed -E 's/[A-Za-z0-9_-]{30,}/[omitido]/g; s/^/::notice::deploy: /'
