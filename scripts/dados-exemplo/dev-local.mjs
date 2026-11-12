@@ -145,7 +145,7 @@ async function principal() {
     return;
   }
 
-  const filho = spawn('base44', ['dev'], { shell: true, stdio: ['inherit', 'pipe', 'pipe'] });
+  const filho = spawn('base44 dev', { shell: true, stdio: ['inherit', 'pipe', 'pipe'] });
   let carregado = false;
   const observar = (pedaco, destino) => {
     destino.write(pedaco);
