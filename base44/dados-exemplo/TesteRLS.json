@@ -1,0 +1,5 @@
+[
+  { "titulo": "Criado por mim", "observacao": "Visível para quem criou" },
+  { "titulo": "Criado por outra pessoa, liberado para mim", "leitor_email": "{{eu}}", "_criado_por": "outro" },
+  { "titulo": "Criado por outra pessoa, sem acesso", "leitor_email": "terceiro@exemplo.invalid", "_criado_por": "outro" }
+]

@@ -41,7 +41,20 @@ export const AuthProvider = ({ children }) => {
         // Handle app-level errors
         if (appError.status === 403 && appError.data?.extra_data?.reason) {
           const reason = appError.data.extra_data.reason;
-          if (reason === 'auth_required') {
+          if (reason === 'auth_required' && import.meta.env.DEV) {
+            // Só em desenvolvimento local: as configurações públicas vêm da produção,
+            // que recusa o token local. Segue para o login local; o backend local
+            // continua aplicando o RLS em cada chamada.
+            if (appParams.token) {
+              await checkUserAuth();
+            } else {
+              setIsLoadingAuth(false);
+              setIsAuthenticated(false);
+              setAuthChecked(true);
+            }
+            setIsLoadingPublicSettings(false);
+            return;
+          } else if (reason === 'auth_required') {
             setAuthError({
               type: 'auth_required',
               message: 'Authentication required'
