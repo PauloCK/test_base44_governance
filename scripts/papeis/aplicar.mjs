@@ -19,6 +19,11 @@ function sair(msg) {
   process.exit(1);
 }
 
+// Motivo do erro devolvido pela API, sem emails e curto, para o log.
+function motivo(r) {
+  return r.texto.replace(/[^\s"@]+@[^\s"]+/g, '[email]').replace(/\s+/g, ' ').slice(0, 200);
+}
+
 async function chamar(metodo, caminho, corpo) {
   const r = await fetch(`${API}/${appId}${caminho}`, {
     method: metodo,
@@ -51,10 +56,10 @@ async function principal() {
       if (simular) continue;
       const r = await chamar('PUT', `/entities/User/${atual.id}`, { role: papel });
       if (r.status === 200 && r.json?.role === papel) feito.trocados++;
-      else { feito.falhas++; console.log(`::error::papéis: falha ao trocar o papel de ${mascarar(email)} (HTTP ${r.status}, papel resultante ${r.json?.role ?? '?'})`); }
+      else { feito.falhas++; console.log(`::error::papéis: falha ao trocar o papel de ${mascarar(email)} (HTTP ${r.status}, papel resultante ${r.json?.role ?? '?'}): ${motivo(r)}`); }
       continue;
     }
-    console.log(`::notice::papéis: ${mascarar(email)} liberado como ${papel}${simular ? ' (simulado)' : ''}`);
+    console.log(`::notice::papéis: liberando ${mascarar(email)} como ${papel}${simular ? ' (simulado)' : ''}`);
     if (simular) continue;
     const r = await chamar('POST', '/users/provisions', { email, role: papel, ...(nome ? { full_name: nome } : {}) });
     if (r.status >= 200 && r.status < 300) {
@@ -62,7 +67,7 @@ async function principal() {
       if (r.json?.status === 'exists' && r.json?.role !== papel) {
         console.log(`::warning::papéis: ${mascarar(email)} já tinha acesso pendente como ${r.json.role}; o papel ${papel} só vale depois do primeiro login e do próximo deploy`);
       }
-    } else { feito.falhas++; console.log(`::error::papéis: falha ao liberar ${mascarar(email)} (HTTP ${r.status})`); }
+    } else { feito.falhas++; console.log(`::error::papéis: falha ao liberar ${mascarar(email)} (HTTP ${r.status}): ${motivo(r)}`); }
   }
 
   const doArquivo = new Set(usuarios.map((u) => u.email));
