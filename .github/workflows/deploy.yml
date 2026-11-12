@@ -6,13 +6,15 @@ on:
 concurrency:
   group: deploy-production
   cancel-in-progress: false
-# Sem environment com aprovação: em repo privado ela exige GitHub Enterprise. A barreira é a
-# aprovação do PR (CODEOWNERS) antes do merge na main.
+# O environment production não tem aprovação (em repo privado ela exige GitHub Enterprise); ele
+# existe para guardar as secrets do deploy e só aceitar a branch main. Assim uma branch qualquer
+# não consegue ler as credenciais. A barreira de aprovação é o PR (CODEOWNERS) antes do merge.
 permissions:
   contents: read
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
