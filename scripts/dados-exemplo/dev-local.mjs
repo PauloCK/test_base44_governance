@@ -1,18 +1,19 @@
 // Sobe o `base44 dev` e carrega os dados de exemplo no servidor local.
 //
 // Uso:
-//   npm run dev:local                      sobe o servidor e carrega os dados como admin
+//   npm run dev:local                      sobe o servidor e carrega os dados com o seu papel
 //   npm run dev:local -- --papel rh        carrega só o que o papel rh veria em produção
 //   npm run dados-exemplo -- --papel pd    recarrega os dados com o servidor já no ar
 //
-// O papel padrão pode ficar no .env.local:  PAPEL_LOCAL=rh
+// Qual papel vale, em ordem: --papel, PAPEL_LOCAL no .env.local, o seu papel em
+// base44/papeis.json na main (o mesmo de produção) e, por fim, admin.
 //
 // Regras do filtro:
 //   - entidade que ainda não existe na main (nova na sua branch): carrega todos os exemplos;
 //   - entidade que já existe na main: carrega só o que o papel escolhido leria em produção,
 //     usando a regra de leitura da main.
 // Os dados vêm só de base44/dados-exemplo/ e vão só para o servidor local. Nada é lido de produção.
-import { spawn, execSync } from 'node:child_process';
+import { spawn, execSync, execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import {
   lerEntidades, lerExemplos, lerArquivoJsonc, entidadeNaMain, refExiste, podeLer, prepararRegistro,
@@ -62,8 +63,25 @@ function emailDoDesenvolvedor() {
   return m[1];
 }
 
-function papelEscolhido() {
-  const papel = argumento('papel') ?? lerEnvLocal().PAPEL_LOCAL ?? 'admin';
+// Papel da pessoa em base44/papeis.json da main; se não houver main, o da branch.
+function papelNoRepo(email) {
+  let texto = null;
+  try {
+    texto = execFileSync('git', ['show', `${REF_PRODUCAO}:base44/papeis.json`], { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });
+  } catch {
+    if (existsSync('base44/papeis.json')) texto = readFileSync('base44/papeis.json', 'utf-8');
+  }
+  if (!texto) return undefined;
+  try {
+    const achado = (JSON.parse(texto).usuarios ?? []).find((u) => u.email?.toLowerCase() === email.toLowerCase());
+    return achado?.papel;
+  } catch {
+    return undefined;
+  }
+}
+
+function papelEscolhido(email) {
+  const papel = argumento('papel') ?? lerEnvLocal().PAPEL_LOCAL ?? papelNoRepo(email) ?? 'admin';
   const user = lerEntidades().find((e) => e.nome === 'User');
   const permitidos = user?.schema?.properties?.role?.enum ?? ['admin', 'user'];
   if (!permitidos.includes(papel)) falhar(`papel "${papel}" não existe. Papéis do app: ${permitidos.join(', ')}`);
@@ -136,8 +154,8 @@ export async function carregar({ porta, appId, email, papel }) {
 
 async function principal() {
   const appId = idDoApp();
-  const papel = papelEscolhido();
   const email = emailDoDesenvolvedor();
+  const papel = papelEscolhido(email);
   const porta = Number(argumento('porta') ?? 4400);
 
   if (process.argv.includes('--so-carregar')) {

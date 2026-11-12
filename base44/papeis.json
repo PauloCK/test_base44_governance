@@ -1,0 +1,15 @@
+{
+  "_leia": "Quem tem qual papel no app. Mudar aqui, por PR, é o único jeito oficial de dar ou tirar acesso. O deploy reaplica este arquivo em produção. Quem está no app e não está aqui não é alterado, só aparece no log do deploy.",
+  "usuarios": [
+    {
+      "email": "novo.usuario@exemplo.invalid",
+      "papel": "rh",
+      "nome": "Usuário de teste RH"
+    },
+    {
+      "email": "outro.usuario@exemplo.invalid",
+      "papel": "pd",
+      "nome": "Usuário de teste P&D"
+    }
+  ]
+}
