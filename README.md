@@ -4,22 +4,10 @@ App de teste de governança: código no GitHub como fonte da verdade, deploy no 
 
 ## Desenvolvimento local
 
-Setup, uma vez por máquina:
+- **Setup inicial (uma vez por computador):** [docs/SETUP.md](docs/SETUP.md)
+- **Como fazer uma mudança, do computador até produção:** [docs/DESENVOLVIMENTO.md](docs/DESENVOLVIMENTO.md)
 
-1. Instalar Node 22, Deno, Git e o Base44 CLI (`npm install -g base44`).
-2. Clonar o repo e rodar `npm install`.
-3. `base44 login` com a sua conta. Não precisa ser colaborador do app.
-4. `base44 link` para criar o `base44/.app.jsonc`, e criar o `.env.local` com `VITE_BASE44_APP_ID`. Nenhum dos dois vai para o repo.
-
-No dia a dia:
-
-```
-git pull
-npm run dev:local                  # sobe o servidor local e carrega os dados de exemplo como admin
-npm run dev:local -- --papel rh    # carrega só o que o papel rh veria em produção
-```
-
-Abra `http://localhost:5173` e entre com o email do `base44 login` e qualquer senha. Tudo roda na sua máquina: nada é lido nem gravado em produção.
+Os dois estão em passo a passo numerado, para pessoas e para a IA que ajuda quem desenvolve.
 
 ### Dados de exemplo
 
