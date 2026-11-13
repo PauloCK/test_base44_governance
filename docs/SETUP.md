@@ -66,11 +66,11 @@ Escrito para ser seguido por uma pessoa ou pela IA dela. A IA executa os comando
     base44 whoami
     ```
     O `whoami` deve mostrar o email da pessoa.
-12. Descobrir o ID do app:
+12. Obter o ID do app. O responsável pelo repositório deixa o ID disponível para quem faz o setup; peça a ele antes de começar, se ainda não tiver. Quem tem permissão no repositório também consegue ler:
     ```powershell
     gh variable get BASE44_APP_ID
     ```
-    Se o GitHub não deixar ler a variável, peça o ID ao responsável pelo repositório. O ID não é segredo, mas nunca é escrito no código nem nos workflows.
+    O ID não é segredo, mas nunca é escrito no código, nos workflows nem em arquivos que vão para o repositório. Ele só entra nos dois arquivos locais do passo 13.
 13. Ligar a pasta ao app e criar o arquivo de configuração local, trocando `<ID>` pelo ID do passo 12:
     ```powershell
     base44 link --app-id <ID>
