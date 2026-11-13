@@ -13,8 +13,9 @@ export default function Home() {
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
-    base44.entities.TesteRLS.filter({}, { sort: '-created_date', limit: 50 })
-      .then((pagina) => setRegistros(pagina.items ?? []))
+    // Forma com argumentos soltos (ordem, limite): funciona no app no ar e no servidor local.
+    base44.entities.TesteRLS.filter({}, '-created_date', 50)
+      .then((lista) => setRegistros(lista ?? []))
       .finally(() => setCarregando(false));
   }, []);
 
