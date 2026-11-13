@@ -32,7 +32,7 @@ export default function Home() {
             Ambiente interno
           </span>
           <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
-            Teste Governança
+            Teste Governança: demo
           </h1>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#6b6659]">
             Entidade <span className="font-medium text-[#1a1a18]">TesteRLS</span> para validar permissões de
